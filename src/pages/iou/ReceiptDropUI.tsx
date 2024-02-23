@@ -15,6 +15,7 @@ type ReceiptDropUIProps = {
     receiptImageTopPosition?: number;
 };
 
+
 function ReceiptDropUI({onDrop, receiptImageTopPosition}: ReceiptDropUIProps) {
     const styles = useThemeStyles();
     const {translate} = useLocalize();
