@@ -19,6 +19,7 @@ import {PressableWithoutFeedback} from '@components/Pressable';
 import ScreenWrapper from '@components/ScreenWrapper';
 import ScrollView from '@components/ScrollView';
 import Text from '@components/Text';
+import TextInput from '@components/TextInput';
 import useActiveWorkspace from '@hooks/useActiveWorkspace';
 import useLocalize from '@hooks/useLocalize';
 import useNetwork from '@hooks/useNetwork';
@@ -126,6 +127,7 @@ function WorkspacesListPage({policies, allPolicyMembers, reimbursementAccount, r
     const [policyIDToDelete, setPolicyIDToDelete] = useState<string>();
     const [policyNameToDelete, setPolicyNameToDelete] = useState<string>();
     const isLessThanMediumScreen = isMediumScreenWidth || isSmallScreenWidth;
+    const [searchTerm, setSearchTerm] = useState('');
 
     const confirmDeleteAndHideModal = () => {
         if (!policyIDToDelete || !policyNameToDelete) {
@@ -216,42 +218,6 @@ function WorkspacesListPage({policies, allPolicyMembers, reimbursementAccount, r
         },
         [isLessThanMediumScreen, styles.mb3, styles.mh5, styles.ph5, styles.hoveredComponentBG, translate],
     );
-
-    const listHeaderComponent = useCallback(() => {
-        if (isLessThanMediumScreen) {
-            return <View style={styles.mt5} />;
-        }
-
-        return (
-            <View style={[styles.flexRow, styles.gap5, styles.p5, styles.pl10, styles.appBG]}>
-                <View style={[styles.flexRow, styles.flex1]}>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.flexGrow1, styles.textLabelSupporting]}
-                    >
-                        {translate('workspace.common.workspaceName')}
-                    </Text>
-                </View>
-                <View style={[styles.flexRow, styles.flex1, styles.workspaceOwnerSectionTitle]}>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.flexGrow1, styles.textLabelSupporting]}
-                    >
-                        {translate('workspace.common.workspaceOwner')}
-                    </Text>
-                </View>
-                <View style={[styles.flexRow, styles.flex1, styles.workspaceTypeSectionTitle]}>
-                    <Text
-                        numberOfLines={1}
-                        style={[styles.flexGrow1, styles.textLabelSupporting]}
-                    >
-                        {translate('workspace.common.workspaceType')}
-                    </Text>
-                </View>
-                <View style={[styles.ml10, styles.mr2]} />
-            </View>
-        );
-    }, [isLessThanMediumScreen, styles, translate]);
 
     const policyRooms = useMemo(() => {
         if (!reports || isEmptyObject(reports)) {
@@ -345,6 +311,84 @@ function WorkspacesListPage({policies, allPolicyMembers, reimbursementAccount, r
             .sort((a, b) => localeCompare(a.title, b.title));
     }, [reimbursementAccount?.errors, policies, isOffline, theme.textLight, allPolicyMembers, policyRooms]);
 
+    const sortWorkspacesBySelected = (workspace1: WorkspaceItem, workspace2: WorkspaceItem, selectedWorkspaceID: string | undefined): number => {
+        if (workspace1.policyID === selectedWorkspaceID) {
+            return -1;
+        }
+        if (workspace2.policyID === selectedWorkspaceID) {
+            return 1;
+        }
+        return workspace1.title?.toLowerCase().localeCompare(workspace2.title?.toLowerCase() ?? '') ?? 0;
+    };
+    const filteredAndSortedUserWorkspaces = useMemo(
+        () =>
+            workspaces
+                .filter((policy) => policy.title?.toLowerCase().includes(searchTerm?.toLowerCase() ?? ''))
+                .sort((policy1, policy2) => sortWorkspacesBySelected(policy1, policy2, activeWorkspaceID)),
+        [searchTerm, workspaces, activeWorkspaceID],
+    );
+
+    const shouldShowSearch = workspaces.length > CONST.WORKSPACE_SWITCHER.MINIMUM_WORKSPACES_TO_SHOW_SEARCH;
+    const listHeaderComponent = useCallback(
+        () => (
+            <>
+                {shouldShowSearch ? (
+                    <View style={[styles.gap5, styles.p5, styles.pl10, styles.appBG]}>
+                        {' '}
+                        <TextInput
+                            onChangeText={setSearchTerm}
+                            defaultValue={searchTerm}
+                            placeholder={translate('workspace.common.workspaceSearch')}
+                            maxLength={CONST.ADDITIONAL_ALLOWED_CHARACTERS}
+                            iconLeft={Expensicons.MagnifyingGlass}
+                            accessibilityLabel={translate('workspace.common.workspaceSearch')}
+                            role={CONST.ROLE.PRESENTATION}
+                            spellCheck={false}
+                        />
+                    </View>
+                ) : null}
+                {isLessThanMediumScreen ? (
+                    <View style={styles.mt5} />
+                ) : (
+                    <View style={[styles.flexRow, styles.gap5, styles.p5, styles.pl10, styles.appBG]}>
+                        {filteredAndSortedUserWorkspaces.length > 0 ? (
+                            <>
+                                <View style={[styles.flexRow, styles.flex1]}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[styles.flexGrow1, styles.textLabelSupporting]}
+                                    >
+                                        {translate('workspace.common.workspaceName')}
+                                    </Text>
+                                </View>
+                                <View style={[styles.flexRow, styles.flex1, styles.workspaceOwnerSectionTitle]}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[styles.flexGrow1, styles.textLabelSupporting]}
+                                    >
+                                        {translate('workspace.common.workspaceOwner')}
+                                    </Text>
+                                </View>
+                                <View style={[styles.flexRow, styles.flex1, styles.workspaceTypeSectionTitle]}>
+                                    <Text
+                                        numberOfLines={1}
+                                        style={[styles.flexGrow1, styles.textLabelSupporting]}
+                                    >
+                                        {translate('workspace.common.workspaceType')}
+                                    </Text>
+                                </View>
+                                <View style={[styles.ml10, styles.mr2]} />
+                            </>
+                        ) : (
+                            <Text>{translate('common.noResultsFound')}</Text>
+                        )}
+                    </View>
+                )}
+            </>
+        ),
+        [isLessThanMediumScreen, styles, translate, shouldShowSearch, filteredAndSortedUserWorkspaces.length, searchTerm],
+    );
+
     if (isEmptyObject(workspaces)) {
         return (
             <ScreenWrapper
@@ -407,7 +451,7 @@ function WorkspacesListPage({policies, allPolicyMembers, reimbursementAccount, r
                     />
                 </HeaderWithBackButton>
                 <FlatList
-                    data={workspaces}
+                    data={filteredAndSortedUserWorkspaces}
                     renderItem={getMenuItem}
                     ListHeaderComponent={listHeaderComponent}
                     stickyHeaderIndices={[0]}
