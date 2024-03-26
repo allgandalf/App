@@ -2952,6 +2952,16 @@ function getReportDescriptionText(report: Report): string {
     return parser.htmlToText(report.description);
 }
 
+function getReportDescriptionTextFromHTML(description: string): string {
+    if(description === '') {
+        return '';
+    }
+
+    const parser = new ExpensiMark();
+
+    return parser.htmlToText(description);
+}
+
 function getPolicyDescriptionText(policy: OnyxEntry<Policy>): string {
     if (!policy?.description) {
         return '';
@@ -5733,6 +5743,7 @@ export {
     shouldCreateNewMoneyRequestReport,
     isTrackExpenseReport,
     hasActionsWithErrors,
+    getReportDescriptionTextFromHTML,
 };
 
 export type {

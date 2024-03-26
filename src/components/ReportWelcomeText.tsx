@@ -111,7 +111,7 @@ function ReportWelcomeText({report, policy, personalDetails}: ReportWelcomeTextP
                             style={styles.renderHTML}
                             accessibilityLabel={translate('reportDescriptionPage.roomDescription')}
                         >
-                            <RenderHTML html={report.description} />
+                            <RenderHTML html={ReportUtils.getParsedComment(report.description ?? '')} />
                         </PressableWithoutFeedback>
                     ) : (
                         <Text>

@@ -98,7 +98,8 @@ function HeaderView({report, personalDetails, parentReport, parentReportAction, 
     const isUserCreatedPolicyRoom = ReportUtils.isUserCreatedPolicyRoom(report);
     const isPolicyMember = useMemo(() => !isEmptyObject(policy), [policy]);
     const canLeaveRoom = ReportUtils.canLeaveRoom(report, isPolicyMember);
-    const reportDescription = ReportUtils.getReportDescriptionText(report);
+    const parsedDescription = ReportUtils.getParsedComment(report.description ?? '');
+    const reportDescription = ReportUtils.getReportDescriptionTextFromHTML(parsedDescription);
     const policyName = ReportUtils.getPolicyName(report, true);
     const policyDescription = ReportUtils.getPolicyDescriptionText(policy);
     const isPersonalExpenseChat = isPolicyExpenseChat && ReportUtils.isCurrentUserSubmitter(report.reportID);

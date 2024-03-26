@@ -86,6 +86,7 @@ function ReportDetailsPage({policies, report, session, personalDetails}: ReportD
     const isPrivateNotesFetchTriggered = report?.isLoadingPrivateNotes !== undefined;
 
     const isSelfDM = useMemo(() => ReportUtils.isSelfDM(report), [report]);
+    const parsedDescription = ReportUtils.getParsedComment(report.description ?? '');
 
     useEffect(() => {
         // Do not fetch private notes if isLoadingPrivateNotes is already defined, or if the network is offline, or if the report is a self DM.
@@ -262,7 +263,7 @@ function ReportDetailsPage({policies, report, session, personalDetails}: ReportD
                             <MenuItemWithTopDescription
                                 shouldShowRightIcon={canEditReportDescription}
                                 interactive={canEditReportDescription}
-                                title={report.description}
+                                title={parsedDescription}
                                 shouldRenderAsHTML
                                 shouldCheckActionAllowedOnPress={false}
                                 description={translate('reportDescriptionPage.roomDescription')}

@@ -101,7 +101,7 @@ function WorkspaceNewRoomPage({policies, reports, formState, session, activePoli
      */
     const submit = (values: FormOnyxValues<typeof ONYXKEYS.FORMS.NEW_ROOM_FORM>) => {
         const participants = [session?.accountID ?? 0];
-        const parsedDescription = ReportUtils.getParsedComment(values.reportDescription ?? '');
+        
         const policyReport = ReportUtils.buildOptimisticChatReport(
             participants,
             values.roomName,
@@ -115,7 +115,7 @@ function WorkspaceNewRoomPage({policies, reports, formState, session, activePoli
             CONST.REPORT.NOTIFICATION_PREFERENCE.ALWAYS,
             '',
             '',
-            parsedDescription,
+            values.reportDescription,
         );
         setNewRoomReportID(policyReport.reportID);
         Report.addPolicyReport(policyReport);
