@@ -65,6 +65,11 @@ function BaseOnboardingWorkEmail({shouldUseNativeStyles, route}: BaseOnboardingW
 
             
 
+            // Waiting for the exact props to be passed
+            // SessionActions.signInWithPrivateDomainAccount() 
+
+            
+
         },
         [onboardingPurposeSelected, onboardingAdminsChatReportID, onboardingPolicyID, route.params?.backTo, activeWorkspaceID, canUseDefaultRooms, isSmallScreenWidth, shouldUseNarrowLayout],
     );
@@ -218,7 +223,6 @@ function BaseOnboardingWorkEmail({shouldUseNativeStyles, route}: BaseOnboardingW
                         spellCheck={false}
                     />
                 </View>
-                {/* The below button would be displayed aboe the submit button */}
             </FormProvider>
             {isSmallScreenWidth && <OfflineIndicator />}
         </ScreenWrapper>
