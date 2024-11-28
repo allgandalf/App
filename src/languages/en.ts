@@ -1744,6 +1744,15 @@ const translations = {
         whatsYourName: "What's your name?",
         whereYouWork: 'Where do you work?',
         errorSelection: 'Please make a selection to continue.',
+        workEmail: {
+            title: 'What’s your work email?',
+            subtitle: 'Expensify works best when you connect your work email.',
+            explanationModal: {
+                descriptionOne: 'Forward email receipts for automatic scanning',
+                descriptionTwo: 'Join your colleagues already using Expensify',
+                descriptionThree: 'Enjoy a more customized experience',
+            },
+        },
         purpose: {
             title: 'What do you want to do today?',
             errorContinue: 'Please press continue to get set up.',

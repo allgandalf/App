@@ -103,6 +103,10 @@ function setOnboardingCompanySize(value: OnboardingCompanySize) {
     Onyx.set(ONYXKEYS.ONBOARDING_COMPANY_SIZE, value);
 }
 
+function setOnboardingWorkEmail(value: string) {
+    Onyx.set(ONYXKEYS.ONBOARDING_WORK_EMAIL, value);
+}
+
 function setOnboardingErrorMessage(value: string) {
     Onyx.set(ONYXKEYS.ONBOARDING_ERROR_MESSAGE, value ?? null);
 }
@@ -212,4 +216,5 @@ export {
     setOnboardingErrorMessage,
     setOnboardingCompanySize,
     setSelfTourViewed,
+    setOnboardingWorkEmail,
 };

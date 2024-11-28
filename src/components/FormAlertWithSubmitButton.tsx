@@ -63,6 +63,8 @@ type FormAlertWithSubmitButtonProps = {
 
     /** The priority to assign the enter key event listener to buttons. 0 is the highest priority. */
     enterKeyEventListenerPriority?: number;
+
+    shouldRenderFooterAboveSubmit?: boolean;
 };
 
 function FormAlertWithSubmitButton({
@@ -76,6 +78,7 @@ function FormAlertWithSubmitButton({
     disablePressOnEnter = false,
     isSubmitActionDangerous = false,
     footerContent,
+    shouldRenderFooterAboveSubmit = false,
     buttonRef,
     buttonStyles,
     buttonText,
@@ -106,6 +109,7 @@ function FormAlertWithSubmitButton({
         >
             {(isOffline: boolean | undefined) => (
                 <View>
+                    {shouldRenderFooterAboveSubmit && footerContent}
                     {isOffline && !enabledWhenOffline ? (
                         <Button
                             success
@@ -132,7 +136,7 @@ function FormAlertWithSubmitButton({
                             large={!useSmallerSubmitButtonSize}
                         />
                     )}
-                    {footerContent}
+                    {!shouldRenderFooterAboveSubmit && footerContent}
                 </View>
             )}
         </FormAlertWrapper>

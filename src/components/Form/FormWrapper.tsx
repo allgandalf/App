@@ -37,6 +37,8 @@ type FormWrapperProps = ChildrenProps &
 
         /** Callback to submit the form */
         onSubmit: () => void;
+
+        shouldRenderFooterAboveSubmit?: boolean;
     };
 
 function FormWrapper({
@@ -58,6 +60,7 @@ function FormWrapper({
     shouldHideFixErrorsAlert = false,
     disablePressOnEnter = false,
     isSubmitDisabled = false,
+    shouldRenderFooterAboveSubmit = false,
 }: FormWrapperProps) {
     const styles = useThemeStyles();
     const formRef = useRef<RNScrollView>(null);
@@ -121,6 +124,7 @@ function FormWrapper({
                         isSubmitActionDangerous={isSubmitActionDangerous}
                         disablePressOnEnter={disablePressOnEnter}
                         enterKeyEventListenerPriority={1}
+                        shouldRenderFooterAboveSubmit={shouldRenderFooterAboveSubmit}
                     />
                 )}
             </FormElement>
