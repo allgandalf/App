@@ -17,9 +17,9 @@ import ROUTES from '@src/ROUTES';
 import type SCREENS from '@src/SCREENS';
 import {isEmptyObject} from '@src/types/utils/EmptyObject';
 
-import {CONST as COMMON_CONST} from 'expensify-common';
 import type {ValueOf} from 'type-fest';
 
+import {CONST as COMMON_CONST} from 'expensify-common';
 import React, {useEffect} from 'react';
 
 type ConfirmDelegateValidateCodePageProps = PlatformStackScreenProps<SettingsNavigatorParamList, typeof SCREENS.SETTINGS.DELEGATE.DELEGATE_CONFIRM_VALIDATE_CODE>;
