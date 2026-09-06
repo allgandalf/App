@@ -9,6 +9,7 @@ type ResendValidateCodeBaseParams = {
         | typeof CONST.VALIDATE_CODE_REASONS.REPLACE_CARD
         | typeof CONST.VALIDATE_CODE_REASONS.REPORT_CARD_FRAUD
         | typeof CONST.VALIDATE_CODE_REASONS.ADD_DELEGATE
+        | typeof CONST.VALIDATE_CODE_REASONS.UPDATE_DELEGATE
     >;
 };
 
@@ -32,6 +33,11 @@ type ResendValidateCodeForAddDelegateParams = {
     reasonTargetEmail: string;
 };
 
+type ResendValidateCodeForUpdateDelegateParams = {
+    reasonCode: typeof CONST.VALIDATE_CODE_REASONS.UPDATE_DELEGATE;
+    reasonTargetEmail: string;
+};
+
 // Will be removed eventually
 type ResendValidateCodeNotYetImplementedParams = {
     reasonCode: null;
@@ -43,6 +49,7 @@ type ResendValidateCodeParams =
     | ResendValidateCodeForRevealCardDetailsParams
     | ResendValidateCodeForReplaceCardParams
     | ResendValidateCodeForReportCardFraudParams
-    | ResendValidateCodeForAddDelegateParams;
+    | ResendValidateCodeForAddDelegateParams
+    | ResendValidateCodeForUpdateDelegateParams;
 
 export default ResendValidateCodeParams;
