@@ -11,6 +11,7 @@ import {postSAMLLogin} from '@libs/LoginUtils';
 import Navigation, {navigationRef} from '@libs/Navigation/Navigation';
 import createPlatformStackNavigator from '@libs/Navigation/PlatformStackNavigation/createPlatformStackNavigator';
 import type {PublicScreensParamList} from '@libs/Navigation/types';
+import Visibility from '@libs/Visibility';
 
 import SAMLSignInPage from '@pages/signin/SAMLSignInPage/index.native';
 
@@ -42,6 +43,11 @@ jest.mock('@libs/LoginUtils', () => ({
     handleSAMLLoginError: jest.fn(),
 }));
 
+jest.mock('@libs/Visibility', () => ({
+    isVisible: jest.fn(),
+    onVisibilityChange: jest.fn(),
+}));
+
 jest.mock('@userActions/Session', () => ({
     clearSignInData: jest.fn(),
     setAccountError: jest.fn(),
@@ -52,6 +58,8 @@ jest.mock('@userActions/Session', () => ({
 const mockedOpenAuthSessionAsync = jest.mocked(openAuthSessionAsync);
 const mockedPostSAMLLogin = jest.mocked(postSAMLLogin);
 const mockedGetPlatform = jest.mocked(getPlatform);
+const mockedIsVisible = jest.mocked(Visibility.isVisible);
+const mockedOnVisibilityChange = jest.mocked(Visibility.onVisibilityChange);
 
 const callbackURL = `${CONST.SAML_REDIRECT_URL}?json=${encodeURIComponent(JSON.stringify({shortLivedAuthToken: 'token'}))}`;
 
@@ -84,6 +92,8 @@ describe('SAMLSignInPage', () => {
     beforeEach(async () => {
         jest.clearAllMocks();
         mockedGetPlatform.mockReturnValue(CONST.PLATFORM.IOS);
+        mockedIsVisible.mockReturnValue(true);
+        mockedOnVisibilityChange.mockReturnValue(() => {});
         // postSAMLLogin resolves with the parsed JSON body, and the page only reads its url.
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
         mockedPostSAMLLogin.mockResolvedValue({url: 'https://idp.example.com/sso'} as Response);
@@ -182,5 +192,40 @@ describe('SAMLSignInPage', () => {
         await waitForBatchedUpdatesWithAct();
 
         expect(signInWithShortLivedAuthToken).toHaveBeenCalledWith('token', true, '/search?q=status:outstanding', 'user@saml.example.com');
+    });
+
+    it('waits for the app to be active before signing in with the token', async () => {
+        // Given an in-app browser that returns the token while the user is still in another app
+        mockedIsVisible.mockReturnValue(false);
+        const removeListener = jest.fn();
+        mockedOnVisibilityChange.mockReturnValue(removeListener);
+        renderPage();
+        await waitForBatchedUpdatesWithAct();
+
+        // Then the sign-in request is held back, since iOS cancels a request made before the app is active
+        expect(signInWithShortLivedAuthToken).not.toHaveBeenCalled();
+        expect(mockedOnVisibilityChange).toHaveBeenCalledTimes(1);
+
+        // When the user comes back to the app
+        mockedIsVisible.mockReturnValue(true);
+        act(() => mockedOnVisibilityChange.mock.calls.at(0)?.at(0)?.());
+
+        // Then the user is signed in once
+        expect(signInWithShortLivedAuthToken).toHaveBeenCalledTimes(1);
+        expect(signInWithShortLivedAuthToken).toHaveBeenCalledWith('token', true, '/search?q=status:outstanding', 'user@saml.example.com');
+        expect(removeListener).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not sign in when the app changes state without becoming active', async () => {
+        // Given an in-app browser that returns the token while the user is still in another app
+        mockedIsVisible.mockReturnValue(false);
+        renderPage();
+        await waitForBatchedUpdatesWithAct();
+
+        // When the app changes state but is still not active
+        act(() => mockedOnVisibilityChange.mock.calls.at(0)?.at(0)?.());
+
+        // Then the sign-in request is still held back
+        expect(signInWithShortLivedAuthToken).not.toHaveBeenCalled();
     });
 });
