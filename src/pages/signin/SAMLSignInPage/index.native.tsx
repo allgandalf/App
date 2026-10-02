@@ -10,6 +10,7 @@ import getPlatform from '@libs/getPlatform';
 import Log from '@libs/Log';
 import {postSAMLLogin} from '@libs/LoginUtils';
 import Navigation from '@libs/Navigation/Navigation';
+import Visibility from '@libs/Visibility';
 
 import {clearSignInData, setAccountError, setIsAuthenticatingWithShortLivedToken, signInWithShortLivedAuthToken} from '@userActions/Session';
 
@@ -34,6 +35,7 @@ function SAMLSignInPage() {
     const hasOpenedAuthSession = useRef(false);
     const isAuthSessionOpen = useRef(false);
     const hasExitedSAMLFlow = useRef(false);
+    const removeVisibilityListener = useRef<(() => void) | undefined>(undefined);
 
     // An in-app browser left open blocks the next sign-in attempt from opening one, and only iOS can close it.
     const dismissOpenAuthSession = () => {
@@ -63,6 +65,8 @@ function SAMLSignInPage() {
 
     useEffect(
         () => () => {
+            removeVisibilityListener.current?.();
+
             // Leaving the page must not leave the in-app browser open, or the next sign-in attempt cannot open one.
             if (!dismissOpenAuthSession()) {
                 return;
@@ -105,8 +109,25 @@ function SAMLSignInPage() {
 
             // A forced re-auth leaves account.isLoading true until sign-in, so the token alone decides here.
             if (credentials?.login && shortLivedAuthToken) {
-                Log.info('SAMLSignInPage - Successfully received shortLivedAuthToken. Signing in...');
-                signInWithShortLivedAuthToken(shortLivedAuthToken, true, lastVisitedPath, credentials?.login);
+                const signIn = () => {
+                    Log.info('SAMLSignInPage - Successfully received shortLivedAuthToken. Signing in...');
+                    signInWithShortLivedAuthToken(shortLivedAuthToken, true, lastVisitedPath, credentials?.login);
+                };
+                if (Visibility.isVisible()) {
+                    signIn();
+                    return;
+                }
+
+                // The IdP can finish while the user is in an authenticator app, and iOS cancels a request made before the app is active.
+                Log.info('SAMLSignInPage - Received shortLivedAuthToken while the app is not active. Waiting to sign in...');
+                removeVisibilityListener.current = Visibility.onVisibilityChange(() => {
+                    if (!Visibility.isVisible()) {
+                        return;
+                    }
+                    removeVisibilityListener.current?.();
+                    removeVisibilityListener.current = undefined;
+                    signIn();
+                });
                 return;
             }
 
